@@ -1,3 +1,5 @@
+using ImageTool.BLL;
+
 namespace ImageTool
 {
     public partial class Form1 : Form
@@ -5,6 +7,12 @@ namespace ImageTool
         public Form1()
         {
             InitializeComponent();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            CreateImage createImage = new CreateImage();
+            createImage.SaveImage();
         }
     }
 }
