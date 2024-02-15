@@ -2,7 +2,7 @@
 using System.Text;
 using System.Web;
 
-namespace ImageTool.Definition
+namespace ToolStorage.Definition
 {
     /// <summary>
     /// 头条爬虫
