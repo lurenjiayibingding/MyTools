@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 
 namespace ToolStorage.Definition
 {
@@ -10,6 +11,62 @@ namespace ToolStorage.Definition
             //Execute(command);
             ExecuteCMD(command);
             //ExecuteCMD("ipconfig");
+        }
+
+        public string[] GetAllVideoName(string directoryPath)
+        {
+            if (string.IsNullOrWhiteSpace(directoryPath))
+            {
+                return new string[0];
+            }
+            if (!Directory.Exists(directoryPath))
+            {
+                return new string[0];
+            }
+            return Directory.GetFiles(directoryPath);
+        }
+
+        public void WriteListFile(string directoryPath, string listFileName = "video_list.txt")
+        {
+            var fileNameList = GetAllVideoName(directoryPath).OrderBy(n => n).ToArray();
+            StringBuilder strContent = new StringBuilder();
+            int totalFileCount = fileNameList.Count();
+            for (int i = 0; i < totalFileCount; i++)
+            {
+                strContent.Append($"file '{fileNameList[i]}'{Environment.NewLine}");
+                if (i != 0 && i % 13 == 0)
+                {
+                    AppendText($@"{directoryPath}\{listFileName}", strContent.Remove(strContent.Length - 1, 1).ToString());
+                    strContent.Clear();
+                }
+            }
+            if (strContent.Length > 0)
+            {
+                AppendText($@"{directoryPath}\{listFileName}", strContent.Remove(strContent.Length - 1, 1).ToString());
+            }
+        }
+
+        private void AppendText(string textFilePath, string content)
+        {
+            FileMode mode;
+            if (!File.Exists(textFilePath))
+            {
+                mode = FileMode.Create;
+            }
+            else
+            {
+                mode = FileMode.Append;
+            }
+
+            var bytes = !string.IsNullOrWhiteSpace(content) ? Encoding.UTF8.GetBytes(content) : Array.Empty<byte>();
+
+            if (bytes != null && bytes.Length > 0)
+            {
+                using (FileStream fs = new FileStream(textFilePath, mode, FileAccess.Write))
+                {
+                    fs.Write(bytes, 0, bytes.Length);
+                }
+            }
         }
 
         public void Execute(string command)
