@@ -5,14 +5,36 @@ namespace ToolStorage.Definition
 {
     public class FFmpegHelper
     {
+
+        private readonly string[] videoSuffix;
+        private readonly int bufferLine = 2000;
+
+        public FFmpegHelper()
+        {
+            videoSuffix = new string[] { "MP4", "MOV", "WMV", "FLV", "AVI", "MKV" };
+        }
+
+        /// <summary>
+        /// 合并目录下的所有视频文件为一个文件
+        /// </summary>
+        /// <param name="VideoDirectory">目录路径</param>
+        /// <param name="OutputPath">合并后文件的路径</param>
         public void MergeAllVideo(string VideoDirectory, string OutputPath)
         {
-            var command = @$"ffmpeg -f concat -safe 0 -i {VideoDirectory}\video_list.txt -c copy {OutputPath}";
+            var listFileName = "video_list.txt";
+            WriteListFile(VideoDirectory, listFileName);
+
+            var command = @$"ffmpeg -f concat -safe 0 -i {VideoDirectory}\{listFileName} -c copy {OutputPath}";
             //Execute(command);
             ExecuteCMD(command);
             //ExecuteCMD("ipconfig");
         }
 
+        /// <summary>
+        /// 得到一个目录中所有文件的文件名集合
+        /// </summary>
+        /// <param name="directoryPath">目录路径</param>
+        /// <returns>目录下的文件名集合</returns>
         public string[] GetAllVideoName(string directoryPath)
         {
             if (string.IsNullOrWhiteSpace(directoryPath))
@@ -26,26 +48,49 @@ namespace ToolStorage.Definition
             return Directory.GetFiles(directoryPath);
         }
 
+        /// <summary>
+        /// 将目录中的所有视频文件的文件名写入到一个文本文件中
+        /// </summary>
+        /// <param name="directoryPath">目录路径</param>
+        /// <param name="listFileName">文本文件名</param>
         public void WriteListFile(string directoryPath, string listFileName = "video_list.txt")
         {
-            var fileNameList = GetAllVideoName(directoryPath).OrderBy(n => n).ToArray();
+            var fileNameList = GetAllVideoName(directoryPath).OrderBy(n => n.Length).ThenBy(n => n).ToArray();
             StringBuilder strContent = new StringBuilder();
             int totalFileCount = fileNameList.Count();
             for (int i = 0; i < totalFileCount; i++)
             {
-                strContent.Append($"file '{fileNameList[i]}'{Environment.NewLine}");
-                if (i != 0 && i % 13 == 0)
+                if (videoSuffix.Contains(GetSuffix(fileNameList[i]).ToUpperInvariant()))
                 {
-                    AppendText($@"{directoryPath}\{listFileName}", strContent.Remove(strContent.Length - 1, 1).ToString());
+                    strContent.Append($"file '{fileNameList[i]}'{Environment.NewLine}");
+                }
+                if (i != 0 && i % bufferLine == 0)
+                {
+                    AppendText($@"{directoryPath}\{listFileName}", strContent.ToString());
                     strContent.Clear();
                 }
             }
             if (strContent.Length > 0)
             {
-                AppendText($@"{directoryPath}\{listFileName}", strContent.Remove(strContent.Length - 1, 1).ToString());
+                AppendText($@"{directoryPath}\{listFileName}", strContent.ToString());
             }
         }
 
+        /// <summary>
+        /// 得到文件后缀
+        /// </summary>
+        /// <param name="filePath">文件路径</param>
+        /// <returns>文件的后缀</returns>
+        private string GetSuffix(string filePath)
+        {
+            return filePath.Split('.').Last();
+        }
+
+        /// <summary>
+        /// 向一个文本文件中追加内容
+        /// </summary>
+        /// <param name="textFilePath">文本文件的路径</param>
+        /// <param name="content">需要追加的内容</param>
         private void AppendText(string textFilePath, string content)
         {
             FileMode mode;
