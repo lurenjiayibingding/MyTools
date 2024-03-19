@@ -37,7 +37,7 @@ namespace ToolStorage.Definition
         /// <param name="listFileName">文本文件名</param>
         public void WriteListFile(string directoryPath, string listFileName = "video_list.txt")
         {
-            var fileNameList = FileHelper.GetAllVideoName(directoryPath).OrderBy(n => n.Length).ThenBy(n => n).ToArray();
+            var fileNameList = FileHelper.GetAllFilePaths(directoryPath).OrderBy(n => n.Length).ThenBy(n => n).ToArray();
             StringBuilder strContent = new StringBuilder();
             int totalFileCount = fileNameList.Count();
             for (int i = 0; i < totalFileCount; i++)
