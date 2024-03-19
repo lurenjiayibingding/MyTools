@@ -51,7 +51,7 @@ namespace ToolStorage.Definition
         /// </summary>
         /// <param name="directoryPath">目录路径</param>
         /// <returns>目录下的文件名集合</returns>
-        public static string[] GetAllVideoName(string directoryPath)
+        public static string[] GetAllFilePaths(string directoryPath)
         {
             if (string.IsNullOrWhiteSpace(directoryPath))
             {
@@ -62,6 +62,24 @@ namespace ToolStorage.Definition
                 return new string[0];
             }
             return Directory.GetFiles(directoryPath);
+        }
+
+        /// <summary>
+        /// 得到一个目录中的所有子目录
+        /// </summary>
+        /// <param name="directoryPath">目录路径</param>
+        /// <returns>目录下的文件名集合</returns>
+        public static string[] GetAllDirectoryPaths(string directoryPath)
+        {
+            if (string.IsNullOrWhiteSpace(directoryPath))
+            {
+                return new string[0];
+            }
+            if (!Directory.Exists(directoryPath))
+            {
+                return new string[0];
+            }
+            return Directory.GetDirectories(directoryPath);
         }
     }
 }
