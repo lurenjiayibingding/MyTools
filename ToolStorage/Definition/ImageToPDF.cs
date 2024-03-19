@@ -84,7 +84,9 @@ namespace ToolStorage.Definition
 
                     //文档默认的边框距离
                     float leftMargin = doc.GetLeftMargin();
+                    float rightMargin = doc.GetRightMargin();
                     float topMargin = doc.GetTopMargin();
+                    float bottomMargin = doc.GetBottomMargin();
 
                     //页面宽度和高度
                     float pageWidth = PageSize.A4.GetWidth();
@@ -125,7 +127,7 @@ namespace ToolStorage.Definition
                         float yPosition = (pageHeight - scaledHeight) / 2;
 
                         // 设置图片绝对位置并添加到文档
-                        img.SetFixedPosition(leftMargin / 2, yPosition);
+                        img.SetFixedPosition(leftMargin, yPosition);
                         doc.Add(img);
 
                         //添加换页符
