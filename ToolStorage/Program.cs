@@ -19,7 +19,7 @@ namespace ToolStorage
             //    ImageToPDF.ConvertByiText(FileHelper.GetAllFilePaths(path), @$"{path}\哆啦A梦_{num.ToString()}.pdf");
             //}
 
-            ImageToPDF.ConvertByiText(FileHelper.GetAllFilePaths(@"D:\图片"), @"C:\Users\ljg\Desktop\新建文件夹\图片.pdf");
+            ImageToPDF.AdaptiveConvertByiText(FileHelper.GetAllFilePaths(@"D:\图片"), @"C:\Users\ljg\Desktop\新建文件夹\图片.pdf");
 
             Console.WriteLine("Hello, World!");
         }
