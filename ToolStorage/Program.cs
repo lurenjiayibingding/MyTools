@@ -21,7 +21,8 @@ namespace ToolStorage
             //    var num = path.Substring(path.Length - 2, 2);
             //    ImageToPDF.ConvertByiText(FileHelper.GetAllFilePaths(path), @$"{path}\哆啦A梦_{num.ToString()}.pdf");
             //}
-            ImageToPDF.AdaptiveConvertByiText(FileHelper.GetAllFilePaths(@"C:\Users\刘继光的PC\Desktop\新建文件夹 (2)"), @"C:\Users\刘继光的PC\Desktop\新建文件夹 (2)\图片.pdf");
+
+            iTextPDFHelper.RemoveSpecifiedPage(@"C:\Users\ljg\Desktop\新建文件夹\深入理解UNIX系统内核.pdf", [2, 11]);
 
             Console.WriteLine("Hello, World!");
         }

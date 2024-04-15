@@ -8,9 +8,9 @@ using Newtonsoft.Json;
 namespace ToolStorage.Definition
 {
     /// <summary>
-    /// 将多个图片合并为一个pdf文件
+    /// 通过iText7处理Pdf文档
     /// </summary>
-    public class ImageToPDF
+    public class iTextPDFHelper
     {
         /*
          * 通过itext7处理pdf时还需要安装itext7.bouncy-castle-adapter包
@@ -61,7 +61,7 @@ namespace ToolStorage.Definition
         }
 
         /// <summary>
-        /// 默认的最简单的将多个图片合并为一个pdf的方法
+        /// 将多个图片合并为一个pdf，图片在每个页面中保持居中
         /// </summary>
         /// <param name="imageFilePaths">需要合并到pdf中的所有图片的文件路径集合</param>
         /// <param name="outputPdfPath">合并之后pdf文件的保存路径</param>
@@ -146,6 +146,54 @@ namespace ToolStorage.Definition
             {
                 Console.WriteLine($"创建{outputPdfPath}时发生异常:" + JsonConvert.SerializeObject(ex));
             }
+        }
+
+        /// <summary>
+        /// 删除pdf中的指定页
+        /// 只会删除指定页面但是会保留书签，导行目录等其他信息
+        /// </summary>
+        /// <param name="inputPath">需要删除的pdf文件的路径</param>
+        /// <param name="pageNums">需要删除的页数</param>
+        public static void RemoveSpecifiedPage(string inputPath, IEnumerable<int> pageNums)
+        {
+            var outputPath = inputPath.Split('.').First() + "（副本）.pdf";
+            using (PdfReader pdfReader = new PdfReader(inputPath))
+            {
+                using (PdfWriter writer = new PdfWriter(outputPath))
+                {
+                    using (PdfDocument document = new PdfDocument(pdfReader, writer))
+                    {
+                        foreach (var item in pageNums)
+                        {
+                            document.RemovePage(item);
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void RemoveSpecifiedPage2(string inputPath, IEnumerable<int> pageNums)
+        {
+            var pdfReader = new PdfReader(inputPath);
+            var inputDocument = new PdfDocument(pdfReader);
+            var outputPath = inputPath.Split('.').First() + "（副本）.pdf";
+            var pdfWriter = new PdfWriter(outputPath);
+            var outputDocument = new PdfDocument(pdfWriter);
+
+            var pageTotal = inputDocument.GetNumberOfPages();
+            for (var i = 1; i <= pageTotal; i++)
+            {
+                if (!pageNums.Contains(i))
+                {
+                    var pdfPage = inputDocument.GetPage(i);
+                    outputDocument.AddPage(pdfPage.CopyTo(outputDocument));
+                }
+            }
+
+            outputDocument.Close();
+            inputDocument.Close();
+            pdfWriter.Close();
+            pdfReader.Close();
         }
     }
 }
