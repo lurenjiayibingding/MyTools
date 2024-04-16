@@ -163,9 +163,11 @@ namespace ToolStorage.Definition
                 {
                     using (PdfDocument document = new PdfDocument(pdfReader, writer))
                     {
+                        int i = 0;
                         foreach (var item in pageNums)
                         {
-                            document.RemovePage(item);
+                            document.RemovePage(item - i);
+                            i++;
                         }
                     }
                 }
