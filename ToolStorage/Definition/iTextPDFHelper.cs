@@ -172,6 +172,48 @@ namespace ToolStorage.Definition
             }
         }
 
+        /// <summary>
+        /// 从pdf中删除指定范围内的页数
+        /// </summary>
+        /// <param name="inputPath">需要删除的pdf文件的路径</param>
+        /// <param name="startPage">删除范围的开始页</param>
+        /// <param name="endPage">删除范围的结束页</param>
+        public static void RemvoeRangePage(string inputPath, int startPage, int endPage)
+        {
+            if (!File.Exists(inputPath))
+            {
+                return;
+            }
+            var outputPath = inputPath.Split('.').First() + "（副本）.pdf";
+            if (File.Exists(outputPath))
+            {
+                return;
+            }
+
+            using (PdfReader reader = new PdfReader(inputPath))
+            {
+                using (PdfWriter writer = new PdfWriter(outputPath))
+                {
+                    using (PdfDocument document = new PdfDocument(reader, writer))
+                    {
+                        var pageTotal = document.GetNumberOfPages();
+                        if (pageTotal < startPage)
+                        {
+                            return;
+                        }
+                        if (pageTotal < endPage)
+                        {
+                            endPage = pageTotal;
+                        }
+                        for (int i = 1; i <= endPage - startPage + 1; i++)
+                        {
+                            document.RemovePage(startPage);
+                        }
+                    }
+                }
+            }
+        }
+
         public static void RemoveSpecifiedPage2(string inputPath, IEnumerable<int> pageNums)
         {
             var pdfReader = new PdfReader(inputPath);
