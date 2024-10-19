@@ -1,9 +1,15 @@
 ﻿using iText.IO.Image;
 using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Canvas;
+using iText.Kernel.Pdf.Canvas.Parser;
+using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using iText.Layout;
 using iText.Layout.Element;
+using iText.Layout.Properties;
 using Newtonsoft.Json;
+using ToolStorage.Definition.iTextPDFExtend;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ToolStorage.Definition
 {
@@ -44,7 +50,7 @@ namespace ToolStorage.Definition
                             continue;
                         }
 
-                        Image img = new Image(ImageDataFactory.Create(imageFile));
+                        iText.Layout.Element.Image img = new iText.Layout.Element.Image(ImageDataFactory.Create(imageFile));
                         doc.Add(img);
                         Console.WriteLine($"图片{imageFile}已添加到文件{outputPdfPath}中");
                     }
@@ -102,7 +108,7 @@ namespace ToolStorage.Definition
                         }
 
                         ImageData imageData = ImageDataFactory.Create(imagePath);
-                        Image img = new Image(imageData);
+                        iText.Layout.Element.Image img = new iText.Layout.Element.Image(imageData);
                         //img.SetAutoScale(true);
                         //img.SetProperty(Property.HORIZONTAL_ALIGNMENT, HorizontalAlignment.CENTER);
                         //img.SetProperty(Property.VERTICAL_ALIGNMENT, VerticalAlignment.MIDDLE);
@@ -175,6 +181,35 @@ namespace ToolStorage.Definition
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="inputPath"></param>
+        /// <param name="pageNums"></param>
+        public static void RemoveSpecifiedPage2(string inputPath, IEnumerable<int> pageNums)
+        {
+            var pdfReader = new PdfReader(inputPath);
+            var inputDocument = new PdfDocument(pdfReader);
+            var outputPath = inputPath.Split('.').First() + "（副本）.pdf";
+            var pdfWriter = new PdfWriter(outputPath);
+            var outputDocument = new PdfDocument(pdfWriter);
+
+            var pageTotal = inputDocument.GetNumberOfPages();
+            for (var i = 1; i <= pageTotal; i++)
+            {
+                if (!pageNums.Contains(i))
+                {
+                    var pdfPage = inputDocument.GetPage(i);
+                    outputDocument.AddPage(pdfPage.CopyTo(outputDocument));
+                }
+            }
+
+            outputDocument.Close();
+            inputDocument.Close();
+            pdfWriter.Close();
+            pdfReader.Close();
+        }
+
+        /// <summary>
         /// 从pdf中删除指定范围内的页数
         /// </summary>
         /// <param name="inputPath">需要删除的pdf文件的路径</param>
@@ -216,28 +251,47 @@ namespace ToolStorage.Definition
             }
         }
 
-        public static void RemoveSpecifiedPage2(string inputPath, IEnumerable<int> pageNums)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="inputPath"></param>
+        /// <param name="startPage"></param>
+        /// <param name="endPage"></param>
+        public static void ReplaceText(string inputPath, string outputPath)
         {
-            var pdfReader = new PdfReader(inputPath);
-            var inputDocument = new PdfDocument(pdfReader);
-            var outputPath = inputPath.Split('.').First() + "（副本）.pdf";
-            var pdfWriter = new PdfWriter(outputPath);
-            var outputDocument = new PdfDocument(pdfWriter);
-
-            var pageTotal = inputDocument.GetNumberOfPages();
-            for (var i = 1; i <= pageTotal; i++)
+            if (!File.Exists(inputPath))
             {
-                if (!pageNums.Contains(i))
+                return;
+            }
+            if (string.IsNullOrEmpty(outputPath))
+            {
+                outputPath = inputPath.Split('.').First() + "（副本）.pdf";
+            }
+            //if (File.Exists(outputPath))
+            //{
+            //    return;
+            //}
+
+            using (PdfReader reader = new PdfReader(inputPath))
+            {
+                using (PdfWriter writer = new PdfWriter(outputPath))
                 {
-                    var pdfPage = inputDocument.GetPage(i);
-                    outputDocument.AddPage(pdfPage.CopyTo(outputDocument));
+                    using (PdfDocument document = new PdfDocument(reader, writer))
+                    {
+                        var searchText = "（如需核实离职证明真实性及在职表现，请发送电子邮件：HR@goldentec.com或拨打电话0755-86237080-8136进行咨询。)";
+                        var pageTotal = document.GetNumberOfPages();
+                        for (int i = 1; i <= pageTotal; i++)
+                        {
+                            var currentPage = document.GetPage(i);
+                            var strategy = new TextLocationListener(searchText, "7890", currentPage);
+                            PdfCanvasProcessor processor = new PdfCanvasProcessor(strategy);
+                            processor.ProcessPageContent(currentPage);
+                            // 在处理完成之后调用替换逻辑
+                            strategy.ReplaceText();
+                        }
+                    }
                 }
             }
-
-            outputDocument.Close();
-            inputDocument.Close();
-            pdfWriter.Close();
-            pdfReader.Close();
         }
     }
 }

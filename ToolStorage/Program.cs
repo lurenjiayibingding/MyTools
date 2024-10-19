@@ -22,7 +22,7 @@ namespace ToolStorage
             //    ImageToPDF.ConvertByiText(FileHelper.GetAllFilePaths(path), @$"{path}\哆啦A梦_{num.ToString()}.pdf");
             //}
 
-            iTextPDFHelper.RemoveSpecifiedPage(@"C:\Users\ljg\Desktop\新建文件夹\深入理解UNIX系统内核.pdf", [2, 3, 4, 5, 6]);
+            iTextPDFHelper.ReplaceText(@"C:\Users\刘继光的PC\Desktop\离职测试\刘继光离职证明.pdf", "");
 
             Console.WriteLine("Hello, World!");
         }
