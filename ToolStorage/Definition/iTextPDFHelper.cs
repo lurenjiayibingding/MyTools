@@ -1,15 +1,14 @@
-﻿using iText.IO.Image;
+﻿using iText.IO.Font;
+using iText.IO.Image;
+using iText.Kernel.Font;
 using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
-using iText.Kernel.Pdf.Canvas;
 using iText.Kernel.Pdf.Canvas.Parser;
-using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using iText.Layout;
 using iText.Layout.Element;
-using iText.Layout.Properties;
 using Newtonsoft.Json;
 using ToolStorage.Definition.iTextPDFExtend;
-using static System.Net.Mime.MediaTypeNames;
+using static iText.Kernel.Font.PdfFontFactory;
 
 namespace ToolStorage.Definition
 {
@@ -156,7 +155,7 @@ namespace ToolStorage.Definition
 
         /// <summary>
         /// 删除pdf中的指定页
-        /// 只会删除指定页面但是会保留书签，导行目录等其他信息
+        /// 只会删除指定页面但是会保留书签，目录等其他信息
         /// </summary>
         /// <param name="inputPath">需要删除的pdf文件的路径</param>
         /// <param name="pageNums">需要删除的页数</param>
@@ -181,7 +180,8 @@ namespace ToolStorage.Definition
         }
 
         /// <summary>
-        /// 
+        /// 删除pdf中的指定页
+        /// 同时会删除书签，目录等其他信息
         /// </summary>
         /// <param name="inputPath"></param>
         /// <param name="pageNums"></param>
@@ -252,25 +252,27 @@ namespace ToolStorage.Definition
         }
 
         /// <summary>
-        /// 
+        /// 替换pdf中的文本
         /// </summary>
         /// <param name="inputPath"></param>
-        /// <param name="startPage"></param>
-        /// <param name="endPage"></param>
-        public static void ReplaceText(string inputPath, string outputPath)
+        /// <param name="searchText"></param>
+        /// <param name="substituteText"></param>
+        public static void ReplaceText(string inputPath, string searchText, string substituteText)
         {
+            //新输入的文本长度不得大于被替换的文本，否则会导致排版问题
+            if (substituteText.Length > searchText.Length)
+            {
+                return;
+            }
+
             if (!File.Exists(inputPath))
             {
                 return;
             }
-            if (string.IsNullOrEmpty(outputPath))
-            {
-                outputPath = inputPath.Split('.').First() + "（副本）.pdf";
-            }
-            //if (File.Exists(outputPath))
-            //{
-            //    return;
-            //}
+            var outputPath = inputPath.Split('.').First() + "（副本）.pdf";
+
+            //指定该了固定的字体，未使用pdf中的字体
+            var font = PdfFontFactory.CreateFont("C:/WINDOWS/Fonts/SIMHEI.TTF", PdfEncodings.IDENTITY_H, EmbeddingStrategy.FORCE_EMBEDDED, false);
 
             using (PdfReader reader = new PdfReader(inputPath))
             {
@@ -278,12 +280,11 @@ namespace ToolStorage.Definition
                 {
                     using (PdfDocument document = new PdfDocument(reader, writer))
                     {
-                        var searchText = "（如需核实离职证明真实性及在职表现，请发送电子邮件：HR@goldentec.com或拨打电话0755-86237080-8136进行咨询。)";
                         var pageTotal = document.GetNumberOfPages();
                         for (int i = 1; i <= pageTotal; i++)
                         {
                             var currentPage = document.GetPage(i);
-                            var strategy = new TextLocationListener(searchText, "7890", currentPage);
+                            var strategy = new TextVerbatimOverWritingListener(searchText, substituteText, currentPage, font);
                             PdfCanvasProcessor processor = new PdfCanvasProcessor(strategy);
                             processor.ProcessPageContent(currentPage);
                             // 在处理完成之后调用替换逻辑
