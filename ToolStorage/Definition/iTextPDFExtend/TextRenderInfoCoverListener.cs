@@ -8,7 +8,7 @@ using System.Text;
 namespace ToolStorage.Definition.iTextPDFExtend
 {
     /// <summary>
-    /// 以单个字符为单位对文本进行重写的监听类
+    /// 对文本进行覆盖的监听类
     /// </summary>
     public class TextRenderInfoCoverListener : IEventListener
     {
@@ -16,22 +16,26 @@ namespace ToolStorage.Definition.iTextPDFExtend
         /// 需要被覆盖的文本
         /// </summary>
         private readonly string searchText;
-        private readonly string replacementText;
         private readonly PdfPage pdfPage;
         private readonly List<TextChunk> textInfos = new List<TextChunk>();
+        private readonly List<SingleTextChunkInfo> singleTextChunkInfos = new List<SingleTextChunkInfo>();
 
         /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="searchText"></param>
-        /// <param name="replacementText"></param>
-        public TextRenderInfoCoverListener(string searchText, string replacementText, PdfPage pdfPage)
+        /// <param name="pdfPage"></param>
+        public TextRenderInfoCoverListener(string searchText, PdfPage pdfPage)
         {
             this.searchText = searchText;
-            this.replacementText = replacementText;
             this.pdfPage = pdfPage;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="type"></param>
         public void EventOccurred(IEventData data, EventType type)
         {
             if (type == EventType.RENDER_TEXT)
@@ -53,7 +57,7 @@ namespace ToolStorage.Definition.iTextPDFExtend
         }
 
         /// <summary>
-        /// 覆盖文本
+        /// 以TextRenderInfo为单位覆盖文本
         /// </summary>
         public void CoverText()
         {
@@ -72,7 +76,7 @@ namespace ToolStorage.Definition.iTextPDFExtend
         }
 
         /// <summary>
-        /// 绘制矩形框覆盖文本
+        /// 以TextRenderInfo为单位向pdf文件中绘制矩形覆盖框
         /// </summary>
         /// <param name="startIndex"></param>
         /// <param name="length"></param>
@@ -87,6 +91,47 @@ namespace ToolStorage.Definition.iTextPDFExtend
                 var chunk = textInfos[i];
                 //绘制空白矩形区域以覆盖旧文本
                 pdfCanvas.Rectangle(chunk.GetRectangle());
+                //在每次绘制矩形之后使用 Fill() 方法来填充矩形的颜色。Fill() 会根据当前的填充颜色来绘制矩形
+                pdfCanvas.Fill();
+            }
+        }
+
+        /// <summary>
+        /// 以单个文字为单位覆盖文本
+        /// </summary>
+        public void CoverSingleText()
+        {
+            StringBuilder fullText = new StringBuilder();
+            foreach (var info in textInfos)
+            {
+                singleTextChunkInfos.AddRange(info.GetSingleTextChunkInfo());
+                fullText.Append(info.Text);
+            }
+
+            string strFullText = fullText.ToString();
+            var index = strFullText.IndexOf(searchText, StringComparison.InvariantCulture);
+            if (index != -1)
+            {
+                CoverSingleTextInPdf(index, searchText.Length);
+            }
+        }
+
+        /// <summary>
+        /// 以单个文字为单位向pdf文件中绘制矩形覆盖框
+        /// </summary>
+        /// <param name="startIndex"></param>
+        /// <param name="length"></param>
+        private void CoverSingleTextInPdf(int startIndex, int length)
+        {
+            PdfCanvas pdfCanvas = new PdfCanvas(pdfPage);
+            //设置矩形填充颜色为白色
+            pdfCanvas.SetFillColorRgb(1, 1, 1);
+            // 删除旧文本的区域
+            for (int i = startIndex; i < startIndex + length; i++)
+            {
+                var chunk = singleTextChunkInfos[i];
+                //绘制空白矩形区域以覆盖旧文本
+                pdfCanvas.Rectangle(chunk.Rectangle);
                 //在每次绘制矩形之后使用 Fill() 方法来填充矩形的颜色。Fill() 会根据当前的填充颜色来绘制矩形
                 pdfCanvas.Fill();
             }

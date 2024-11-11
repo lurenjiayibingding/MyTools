@@ -24,7 +24,7 @@ namespace ToolStorage
 
 
             var searchText = "类和泛型";
-            var substituteText = "天下第一";
+            var substituteText = "情深似海";
             iTextPDFHelper.ReplaceText(@"C:\Users\刘继光的PC\Desktop\离职测试\C#经典实例.pdf", searchText, substituteText);
 
             Console.WriteLine("Hello, World!");

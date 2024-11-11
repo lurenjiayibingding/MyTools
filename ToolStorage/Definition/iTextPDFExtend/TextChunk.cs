@@ -30,7 +30,7 @@ namespace ToolStorage.Definition.iTextPDFExtend
         /// </summary>
         public float FontSize { get; private set; }
         /// <summary>
-        /// 文本位置的矢量信息
+        /// 文本位置的起始坐标信息
         /// </summary>
         public Vector Position { get; private set; }
         /// <summary>
@@ -104,25 +104,32 @@ namespace ToolStorage.Definition.iTextPDFExtend
             }
             else
             {
-                var rectangle = GetRectangle();
-                var startX = rectangle.GetX();
-                var startY = rectangle.GetY();
-                var width = rectangle.GetWidth() / length;
-                var height = rectangle.GetHeight();
-
-                for (var i = 0; i < length; i++)
+                var singleInfos = RenderInfo.GetCharacterRenderInfos();
+                foreach (var singleInfo in singleInfos)
                 {
-                    var x = startX + (i * width);
-                    result.Add(new SingleTextChunkInfo
+                    if (singleInfo != null)
                     {
-                        Text = Text[i].ToString(),
-                        Rectangle = new Rectangle(x, startY, width, height),
-                        Font = Font,
-                        FontName = FontName,
-                        FontSize = FontSize,
-                        DrawFontSize = DrawFontSize,
-                        Position = new Vector(x, startY, Position.Get(2))
-                    });
+                        //var startPoint = singleInfo.GetBaseline().GetStartPoint();
+                        //var endPoint = singleInfo.GetBaseline().GetEndPoint();
+                        var ascentLine = singleInfo.GetAscentLine();
+                        var descentLine = singleInfo.GetDescentLine();
+
+                        result.Add(new SingleTextChunkInfo
+                        {
+                            Text = singleInfo.GetText(),
+                            Rectangle = new Rectangle(
+                                descentLine.GetStartPoint().Get(0),
+                                descentLine.GetStartPoint().Get(1),
+                                descentLine.GetEndPoint().Get(0) - descentLine.GetStartPoint().Get(0),
+                                ascentLine.GetStartPoint().Get(1) - descentLine.GetStartPoint().Get(1)),
+
+                            Font = Font,
+                            FontName = FontName,
+                            FontSize = FontSize,
+                            DrawFontSize = DrawFontSize,
+                            Position = singleInfo.GetBaseline().GetStartPoint(),
+                        });
+                    }
                 }
             }
             return result;
@@ -156,7 +163,7 @@ namespace ToolStorage.Definition.iTextPDFExtend
         /// </summary>
         public float DrawFontSize { get; set; }
         /// <summary>
-        /// 文本位置的矢量信息
+        /// 文本位置的起始坐标信息
         /// </summary>
         public Vector Position { get; set; }
     }

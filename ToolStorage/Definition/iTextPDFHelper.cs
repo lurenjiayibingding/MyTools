@@ -284,11 +284,49 @@ namespace ToolStorage.Definition
                         for (int i = 1; i <= pageTotal; i++)
                         {
                             var currentPage = document.GetPage(i);
-                            var strategy = new TextVerbatimOverWritingListener(searchText, substituteText, currentPage, font);
+                            var strategy = new TextOverWritingListener(searchText, substituteText, currentPage);
                             PdfCanvasProcessor processor = new PdfCanvasProcessor(strategy);
                             processor.ProcessPageContent(currentPage);
                             // 在处理完成之后调用替换逻辑
-                            strategy.ReplaceText();
+                            strategy.ReplaceSingleText(false, font);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 覆盖pdf中的文本
+        /// </summary>
+        /// <param name="inputPath"></param>
+        /// <param name="searchText"></param>
+        /// <param name="substituteText"></param>
+        public static void CoverText(string inputPath, string searchText)
+        {
+            if (!File.Exists(inputPath))
+            {
+                return;
+            }
+            var outputPath = string.Join(".", inputPath.Split('.').ToList().Slice(0, -1)) + "（副本）.pdf";
+
+            //指定该了固定的字体，未使用pdf中的字体
+            var font = PdfFontFactory.CreateFont("C:/WINDOWS/Fonts/SIMHEI.TTF", PdfEncodings.IDENTITY_H, EmbeddingStrategy.FORCE_EMBEDDED, false);
+
+            using (PdfReader reader = new PdfReader(inputPath))
+            {
+                using (PdfWriter writer = new PdfWriter(outputPath))
+                {
+                    using (PdfDocument document = new PdfDocument(reader, writer))
+                    {
+                        var pageTotal = document.GetNumberOfPages();
+                        for (int i = 1; i <= pageTotal; i++)
+                        {
+                            var currentPage = document.GetPage(i);
+                            var strategy = new TextRenderInfoCoverListener(searchText, currentPage);
+                            PdfCanvasProcessor processor = new PdfCanvasProcessor(strategy);
+                            processor.ProcessPageContent(currentPage);
+                            // 在处理完成之后调用替换逻辑
+                            strategy.CoverText();
                         }
                     }
                 }
