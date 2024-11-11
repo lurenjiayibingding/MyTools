@@ -29,10 +29,14 @@ namespace ToolStorage.Definition.iTextPDFExtend
         /// pdf中的文本块信息集合
         /// </summary>
         private readonly List<TextChunk> textInfos = new List<TextChunk>();
+        ///// <summary>
+        ///// pdf中的单个字符信息集合
+        ///// </summary>
+        //private readonly List<SingleTextChunkInfo> singleTextInfos = new List<SingleTextChunkInfo>();
         /// <summary>
-        /// pdf中的单个字符信息集合
+        /// pdf中的文本块信息集合
         /// </summary>
-        private readonly List<SingleTextChunkInfo> singleTextInfos = new List<SingleTextChunkInfo>();
+        private readonly List<TextChunk> singleTextInfos = new List<TextChunk>();
 
         /// <summary>
         /// 构造函数
@@ -185,7 +189,7 @@ namespace ToolStorage.Definition.iTextPDFExtend
                 //设置矩形填充颜色为白色6
                 pdfCanvas.SetFillColorRgb(1, 1, 1);
                 //绘制空白矩形区域以覆盖旧文本
-                pdfCanvas.Rectangle(chunk.Rectangle);
+                pdfCanvas.Rectangle(chunk.GetRectangle());
                 //在每次绘制矩形之后使用 Fill() 方法来填充矩形的颜色。Fill() 会根据当前的填充颜色来绘制矩形
                 pdfCanvas.Fill();
 

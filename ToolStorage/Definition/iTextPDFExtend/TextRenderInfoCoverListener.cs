@@ -18,7 +18,7 @@ namespace ToolStorage.Definition.iTextPDFExtend
         private readonly string searchText;
         private readonly PdfPage pdfPage;
         private readonly List<TextChunk> textInfos = new List<TextChunk>();
-        private readonly List<SingleTextChunkInfo> singleTextChunkInfos = new List<SingleTextChunkInfo>();
+        private readonly List<TextChunk> singleTextChunkInfos = new List<TextChunk>();
 
         /// <summary>
         /// 构造函数
@@ -131,7 +131,7 @@ namespace ToolStorage.Definition.iTextPDFExtend
             {
                 var chunk = singleTextChunkInfos[i];
                 //绘制空白矩形区域以覆盖旧文本
-                pdfCanvas.Rectangle(chunk.Rectangle);
+                pdfCanvas.Rectangle(chunk.GetRectangle());
                 //在每次绘制矩形之后使用 Fill() 方法来填充矩形的颜色。Fill() 会根据当前的填充颜色来绘制矩形
                 pdfCanvas.Fill();
             }

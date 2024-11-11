@@ -82,10 +82,37 @@ namespace ToolStorage.Definition.iTextPDFExtend
         }
 
         /// <summary>
+        /// 逐字得到每个文字的信息
+        /// </summary>
+        /// <returns></returns>
+        public List<TextChunk> GetSingleTextChunkInfo()
+        {
+            var result = new List<TextChunk>();
+            var length = Text.Length;
+            if (length == 1)
+            {
+                result.Add(this);
+            }
+            else
+            {
+                var singleInfos = RenderInfo.GetCharacterRenderInfos();
+                foreach (var singleInfo in singleInfos)
+                {
+                    if (singleInfo != null)
+                    {
+                        result.Add(new TextChunk(singleInfo));
+                    }
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
-        public List<SingleTextChunkInfo> GetSingleTextChunkInfo()
+        [Obsolete("已过时的得到每个文字信息的方法")]
+        public List<SingleTextChunkInfo> ObsGetSingleTextChunkInfo()
         {
             var result = new List<SingleTextChunkInfo>();
             var length = Text.Length;
@@ -136,6 +163,10 @@ namespace ToolStorage.Definition.iTextPDFExtend
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    [Obsolete("已过时的每个文字类")]
     public class SingleTextChunkInfo
     {
         /// <summary>
@@ -158,6 +189,9 @@ namespace ToolStorage.Definition.iTextPDFExtend
         /// 字体大小
         /// </summary>
         public float FontSize { get; set; }
+        /// <summary>
+        /// 重绘文本块时实际的字体大小
+        /// </summary>
         /// <summary>
         /// 重绘文本块时实际的字体大小
         /// </summary>
