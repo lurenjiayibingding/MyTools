@@ -161,7 +161,7 @@ namespace ToolStorage.Definition
         /// <param name="pageNums">需要删除的页数</param>
         public static void RemoveSpecifiedPage(string inputPath, IEnumerable<int> pageNums)
         {
-            var outputPath = inputPath.Split('.').First() + "（副本）.pdf";
+            var outputPath = string.Join(".", inputPath.Split('.')[0..^1]) + "（副本）.pdf";
             using (PdfReader pdfReader = new PdfReader(inputPath))
             {
                 using (PdfWriter writer = new PdfWriter(outputPath))
@@ -189,7 +189,7 @@ namespace ToolStorage.Definition
         {
             var pdfReader = new PdfReader(inputPath);
             var inputDocument = new PdfDocument(pdfReader);
-            var outputPath = inputPath.Split('.').First() + "（副本）.pdf";
+            var outputPath = string.Join(".", inputPath.Split('.')[0..^1]) + "（副本）.pdf";
             var pdfWriter = new PdfWriter(outputPath);
             var outputDocument = new PdfDocument(pdfWriter);
 
@@ -221,7 +221,7 @@ namespace ToolStorage.Definition
             {
                 return;
             }
-            var outputPath = inputPath.Split('.').First() + "（副本）.pdf";
+            var outputPath = string.Join(".", inputPath.Split('.')[0..^1]) + "（副本）.pdf";
             if (File.Exists(outputPath))
             {
                 return;
@@ -269,7 +269,8 @@ namespace ToolStorage.Definition
             {
                 return;
             }
-            var outputPath = inputPath.Split('.').First() + "（副本）.pdf";
+
+            var outputPath = string.Join(".", inputPath.Split('.')[0..^1]) + "（副本）.pdf";
 
             //指定该了固定的字体，未使用pdf中的字体
             var font = PdfFontFactory.CreateFont("C:/WINDOWS/Fonts/SIMHEI.TTF", PdfEncodings.IDENTITY_H, EmbeddingStrategy.FORCE_EMBEDDED, false);
@@ -307,7 +308,7 @@ namespace ToolStorage.Definition
             {
                 return;
             }
-            var outputPath = string.Join(".", inputPath.Split('.').ToList().Slice(0, -1)) + "（副本）.pdf";
+            var outputPath = string.Join(".", inputPath.Split('.')[0..^1]) + "（副本）.pdf";
 
             //指定该了固定的字体，未使用pdf中的字体
             var font = PdfFontFactory.CreateFont("C:/WINDOWS/Fonts/SIMHEI.TTF", PdfEncodings.IDENTITY_H, EmbeddingStrategy.FORCE_EMBEDDED, false);
