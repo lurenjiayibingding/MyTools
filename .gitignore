@@ -1,8 +1,0 @@
-﻿*.lock
-*.ide
-*.cache
-*.dll
-*.suo
-.vs
-*\bin
-*\obj
