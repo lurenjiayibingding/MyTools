@@ -2,6 +2,7 @@
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 using System.Drawing;
 using System.Drawing.Imaging;
 
@@ -69,6 +70,79 @@ namespace ToolStorage.Definition
                     };
                     image.Save(jpgPath, encode);
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(JsonConvert.SerializeObject(ex));
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="color"></param>
+        /// <param name="savePath"></param>
+        public static void DrawJpgImg(int width, int height, System.Drawing.Color color, string savePath)
+        {
+            using (Bitmap map = new Bitmap(width, height))
+            {
+                using (Graphics graphics = Graphics.FromImage(map))
+                {
+                    graphics.Clear(color);
+                }
+                map.Save(savePath, ImageFormat.Jpeg);
+            }
+            Console.WriteLine($"图片{savePath}生成成功");
+        }
+
+        /// <summary>
+        /// 水平合并图片
+        /// </summary>
+        /// <param name="imagePaths"></param>
+        /// <param name="outputJpgPath"></param>
+        public static void HorizontalMerge(IEnumerable<string> imagePaths, string outputJpgPath)
+        {
+            try
+            {
+                var images = imagePaths.Select(path => SixLabors.ImageSharp.Image.Load<Rgba32>(path)).ToList();
+                if (images.Count == 0)
+                {
+                    Console.WriteLine("未找到图片，无法合并。");
+                    return;
+                }
+
+                // 计算目标高度（取所有图片的最大高度）
+                int targetHeight = images.Max(img => img.Height);
+
+                // 计算每张图片等比例缩放后的宽度
+                var resizedImages = images.Select(img =>
+                {
+                    if (img.Height == targetHeight)
+                        return img;
+                    int newWidth = (int)Math.Round(img.Width * (targetHeight / (double)img.Height));
+                    var clone = img.Clone(ctx => ctx.Resize(newWidth, targetHeight));
+                    img.Dispose();
+                    return clone;
+                }).ToList();
+
+                int totalWidth = resizedImages.Sum(img => img.Width);
+
+                using (var result = new SixLabors.ImageSharp.Image<Rgba32>(totalWidth, targetHeight))
+                {
+                    int offsetX = 0;
+                    foreach (var img in resizedImages)
+                    {
+                        result.Mutate(ctx => ctx.DrawImage(img, new SixLabors.ImageSharp.Point(offsetX, 0), 1f));
+                        offsetX += img.Width;
+                        img.Dispose();
+                    }
+
+                    var encoder = new JpegEncoder { Quality = 100 };
+                    result.Save(outputJpgPath, encoder);
+                }
+                Console.WriteLine($"图片已合并并保存到: {outputJpgPath}");
             }
             catch (Exception ex)
             {
