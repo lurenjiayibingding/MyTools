@@ -25,20 +25,24 @@ namespace ToolStorage
                 //}
 
 
-                //var searchText = "类和泛型";
-                //var substituteText = "泛型和类";
-                //iTextPDFHelper.RemoveSpecifiedPage2(@"C:\Users\liujiguang\Desktop\人工智能：现代方法（第4版）.pdf", new int[] { 1 });
+                //var searchText = "离职证明";
+                //var substituteText = "考勤证明";
+                //iTextPDFHelper.ReplaceText(@"C:\Users\liujiguang\Desktop\悲催牛马\追觅\离职证明.pdf", searchText, substituteText);
 
                 //PictureHelper.BatchConvertPngToJpg(@"E:\迅雷下载\新建文件夹\新建文件夹");
 
                 //PictureHelper.DrawJpgImg(2000, 2000, System.Drawing.Color.FromArgb(255, 255, 255), @"C:\Users\liujiguang\Desktop\新建文件夹 (2)\1.jpg");
 
-                var dicturePath = @"C:\Users\liujiguang\Desktop\新建文件夹 (2)\追梦少年ゼ_非常喜欢的壁纸，相册有原图";
-                PictureHelper.HorizontalMerge(new List<string> {
-                    @$"{dicturePath}\03.jpg",
-                    @$"{dicturePath}\01.jpg",
-                    @$"{dicturePath}\02.jpg" },
-                    @$"{dicturePath}\04.jpg");
+                //var dicturePath = @"C:\Users\liujiguang\Desktop\新建文件夹 (2)\追梦少年ゼ_非常喜欢的壁纸，相册有原图";
+                //PictureHelper.HorizontalMerge(new List<string> {
+                //    @$"{dicturePath}\03.jpg",
+                //    @$"{dicturePath}\01.jpg",
+                //    @$"{dicturePath}\02.jpg" },
+                //    @$"{dicturePath}\04.jpg");
+
+
+                FileHelper.Remove(@"E:\下江南2", null, SearchOption.AllDirectories, @"E:\下江南", new string[] { ".arw" }, SearchOption.TopDirectoryOnly);
+
 
                 Console.WriteLine("Hello, World!");
             }

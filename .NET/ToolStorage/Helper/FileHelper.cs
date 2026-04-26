@@ -81,5 +81,55 @@ namespace ToolStorage.Definition
             }
             return Directory.GetDirectories(directoryPath);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sourceDirPath"></param>
+        /// <param name="sourceSuffixArray"></param>
+        /// <param name="sourceOption"></param>
+        /// <param name="targetDirPath"></param>
+        /// <param name="targetSuffixArray"></param>
+        /// <param name="targetOption"></param>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        public static void Remove(string sourceDirPath,
+            IEnumerable<string> sourceSuffixArray,
+            SearchOption sourceOption,
+            string targetDirPath,
+            IEnumerable<string> targetSuffixArray,
+            SearchOption targetOption)
+        {
+            if (!Directory.Exists(sourceDirPath) || !Directory.Exists(targetDirPath))
+            {
+                throw new DirectoryNotFoundException("指定的目录不存在");
+            }
+
+            var sourceFiles = Directory.GetFiles(sourceDirPath, "*.*", sourceOption);
+            if (sourceSuffixArray != null && sourceSuffixArray.Any())
+            {
+                sourceFiles = sourceFiles.Where(file => sourceSuffixArray.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase)).ToArray();
+            }
+            var existsNames = sourceFiles.Select(n => Path.GetFileNameWithoutExtension(n)).ToList();
+
+            if (!existsNames.Any())
+            {
+                return;
+            }
+
+            var targetFiles = Directory.GetFiles(targetDirPath, "*.*", targetOption)
+                .Where(n => !existsNames.Contains(Path.GetFileNameWithoutExtension(n)));
+            if (targetSuffixArray != null && targetSuffixArray.Any())
+            {
+                targetFiles = targetFiles.Where(file => targetSuffixArray.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase));
+            }
+            if (targetFiles.Any())
+            {
+                foreach (var item in targetFiles)
+                {
+                    Console.WriteLine($"开始删除{item}");
+                    File.Delete(item);
+                }
+            }
+        }
     }
 }
